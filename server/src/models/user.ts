@@ -7,6 +7,14 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   passwordHash: String, 
+  photo: String,
+  bio: String,
+  phone: String,
+  email: String,
+  googleId: String,
+  twitterId: String,
+  facebookId: String,
+  githubId: String,
 })
 
 export const User = mongoose.model('User', userSchema)
