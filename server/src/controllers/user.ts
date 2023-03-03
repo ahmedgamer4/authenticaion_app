@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt'
 import express from 'express'
+import mongoose from 'mongoose'
 import { User } from '../models/user.js'
 
 export const userRouter = express.Router()
@@ -62,15 +63,18 @@ userRouter.post('/', async (req, res) => {
 userRouter.get('/:id', async (req, res) => {
   const id = req.params.id
   console.log(id)
+  const isValidId = mongoose.Types.ObjectId.isValid(id)
 
-  if (id) {
-    const user = await User.findById({ _id: id })
-    if (user) {
+  try {
+
+    if (id && isValidId) {
+      const user = await User.findById({ _id: id })
       return res.json(user)
     } else {
-      return res.status(404).end()
+      return res.status(404).send('Link is not found')
     }
+
+  } catch(err) {
+    return res.status(500).json(err)
   }
-  
-  return
 })
