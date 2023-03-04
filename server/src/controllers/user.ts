@@ -154,3 +154,19 @@ userRouter.get('/:id', async (req, res) => {
     return res.status(500).json(err)
   }
 })
+
+userRouter.put('/:id', async (req, res) => {
+  const { body } = req
+  const { id } = req.params
+  const isValidId = mongoose.Types.ObjectId.isValid(id)
+
+  try {
+    if (id && isValidId) {
+      const updatedUser = await User.findByIdAndUpdate({ _id: id }, body, { new: true })
+      if (!updatedUser) return res.status(404).end()
+      return res.status(200).json(updatedUser)
+    }
+  } catch(err) {
+    return res.status(500).json(err)
+  }
+})
