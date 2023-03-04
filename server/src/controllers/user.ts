@@ -2,8 +2,22 @@ import bcrypt from 'bcrypt'
 import express from 'express'
 import mongoose from 'mongoose'
 import { User } from '../models/user.js'
+import passport from 'passport'
+import jwt from 'jsonwebtoken'
 
 export const userRouter = express.Router()
+
+type BodyType = {
+  username: string;
+  password: string;
+}
+
+type UserType = {
+  username: string;
+  passwordHash: string;
+  _id: string;
+  __v: number;
+}
 
 userRouter.get('/', async (req, res) => {
   const users = await User.find({})
@@ -11,7 +25,15 @@ userRouter.get('/', async (req, res) => {
   return res.status(200).json(users)
 })
 
-userRouter.post('/', async (req, res) => {
+userRouter.get('/auth/google', (req, res) => {
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+});
+
+userRouter.get('/auth/google/callback', (req, res) => {
+  passport.authenticate('google', { failureRedirect: '/login' })
+})
+
+userRouter.post('/register', async (req, res) => {
   type BodyType = {
     username: string;
     password: string;
@@ -59,6 +81,34 @@ userRouter.post('/', async (req, res) => {
 
   return res.status(201).json(savedUser)
 })
+
+userRouter.post('/login', async (req, res) => {
+  const { username, password } = req.body as BodyType
+
+  const user: UserType = await User.findOne({ username })
+  const passwordCorrect = user === null
+    ? false
+    : await bcrypt.compare(password, user.passwordHash)
+
+  if (!(user && passwordCorrect)) {
+    return res.status(401).json({
+      error: 'invalid username or password',
+    })
+  }
+
+  const userForToken = {
+    username: user.username,
+    id: user._id,
+  }
+
+  const token = jwt.sign(
+    userForToken,
+    process.env.SECRET,
+  )
+
+  res.status(200)
+    .send({ token, username: user.username })
+})  
 
 userRouter.get('/:id', async (req, res) => {
   const id = req.params.id
