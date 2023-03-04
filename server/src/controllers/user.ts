@@ -4,6 +4,7 @@ import mongoose from 'mongoose'
 import { User } from '../models/user.js'
 import passport from 'passport'
 import jwt from 'jsonwebtoken'
+import { SECRET } from '../utils/config.js'
 
 export const userRouter = express.Router()
 
@@ -25,13 +26,14 @@ userRouter.get('/', async (req, res) => {
   return res.status(200).json(users)
 })
 
-userRouter.get('/auth/google', (req, res) => {
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-});
+userRouter.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-userRouter.get('/auth/google/callback', (req, res) => {
-  passport.authenticate('google', { failureRedirect: '/login' })
-})
+userRouter.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
+    const token = jwt.sign({})
+  }
+)
 
 userRouter.post('/register', async (req, res) => {
   type BodyType = {
@@ -77,9 +79,19 @@ userRouter.post('/register', async (req, res) => {
 
   console.log(user)
 
-  const savedUser = user.save()
+  const savedUser = await user.save()
+  
+  const userForToken = {
+    username: savedUser.username,
+    id: savedUser._id,
+  }
 
-  return res.status(201).json(savedUser)
+  const token = jwt.sign(
+    userForToken,
+    SECRET,
+  )
+
+  return res.status(201).json({ token, savedUser })
 })
 
 userRouter.post('/login', async (req, res) => {
