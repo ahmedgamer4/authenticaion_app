@@ -44,6 +44,16 @@ userRouter.get('/auth/google/callback',
   }
 )
 
+userRouter.get('/auth/facebook', passport.authenticate('facebook'));
+
+userRouter.get('/auth/facebook/callback',
+  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  (req, res) => {
+    const token = jwt.sign({ userId: (req.user as UserType).facebookId}, SECRET)
+    res.json({ token })
+  }
+)
+
 userRouter.post('/register', async (req, res) => {
   const { password, email } = req.body as BodyType
 
