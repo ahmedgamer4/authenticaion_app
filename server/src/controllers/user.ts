@@ -9,15 +9,23 @@ import { SECRET } from '../utils/config.js'
 export const userRouter = express.Router()
 
 type BodyType = {
-  username: string;
+  email: string;
   password: string;
 }
 
 type UserType = {
   username: string;
-  passwordHash: string;
   _id: string;
   __v: number;
+  passwordHash?: string; 
+  photo?: string;
+  bio?: string;
+  phone?: string;
+  email?: string;
+  googleId?: string;
+  twitterId?: string;
+  facebookId?: string;
+  githubId?: string;
 }
 
 userRouter.get('/', async (req, res) => {
@@ -31,50 +39,38 @@ userRouter.get('/auth/google', passport.authenticate('google', { scope: ['profil
 userRouter.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
-    const token = jwt.sign({})
+    const token = jwt.sign({ userId: (req.user as UserType).googleId}, SECRET)
+    res.json({ token })
   }
 )
 
 userRouter.post('/register', async (req, res) => {
-  type BodyType = {
-    username: string;
-    password: string;
-    photo: string;
-    bio: string;
-    phone: string;
-    email: string;
-  }
+  const { password, email } = req.body as BodyType
 
-  const { username, password, bio, email, phone, photo } = req.body as BodyType
-
-  const existingUser = await User.findOne({ username })
+  const existingUser = await User.findOne({ email })
   if (existingUser) {
     return res.status(400).json({
       error: 'User already exists',
     }) 
   }
 
-  if (!username || !password) {
+  if (!password) {
     return res.status(400).json({
       error: 'must provide a username and password',
    })
   }
 
-  if (password.length < 3 || username.length < 3) {
+  if (password.length < 3) {
     return res.status(400).json({
-      error: 'username and password cannot be less than 3 characters'
+      error: 'password cannot be less than 3 characters'
     })
   }
 
   const passwordHash = await bcrypt.hash(password, 10)
 
   const user = new User({
-    username, 
     passwordHash,
-    photo,
-    phone,
     email, 
-    bio
   })
 
   console.log(user)
@@ -82,7 +78,6 @@ userRouter.post('/register', async (req, res) => {
   const savedUser = await user.save()
   
   const userForToken = {
-    username: savedUser.username,
     id: savedUser._id,
   }
 
@@ -91,13 +86,13 @@ userRouter.post('/register', async (req, res) => {
     SECRET,
   )
 
-  return res.status(201).json({ token, savedUser })
+  return res.status(201).json({ token })
 })
 
 userRouter.post('/login', async (req, res) => {
-  const { username, password } = req.body as BodyType
+  const { email, password } = req.body as BodyType
 
-  const user: UserType = await User.findOne({ username })
+  const user: UserType = await User.findOne({ email })
   const passwordCorrect = user === null
     ? false
     : await bcrypt.compare(password, user.passwordHash)
@@ -109,7 +104,6 @@ userRouter.post('/login', async (req, res) => {
   }
 
   const userForToken = {
-    username: user.username,
     id: user._id,
   }
 
@@ -119,7 +113,7 @@ userRouter.post('/login', async (req, res) => {
   )
 
   res.status(200)
-    .send({ token, username: user.username })
+    .send({ token })
 })  
 
 userRouter.get('/:id', async (req, res) => {

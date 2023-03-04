@@ -1,4 +1,3 @@
-import mongoose from 'mongoose'
 import passport from 'passport'
 import Google from 'passport-google-oauth2'
 import { User } from '../models/user.js'
@@ -11,20 +10,18 @@ passport.use(new GoogleStrategy({
   clientSecret: GOOGLE_CLIENT_SECRET,
   callbackURL: 'http://localhost:3001/auth/google/callback',
 }, 
-  (accessToken, refreshToken, profile, cb) => {
-    User.findOne({ googleId: profile.id }, (err: mongoose.Error, user: typeof User) => {
-      if (err) return cb(err)
-      if (!user) {
-        const newUser = new User({
-          googleId: profile.id,
-          username: profile.displayName,
-          email: profile.emails[0].value,
-        }) 
-        newUser.save()
-      }
-      return cb(null, user)
-    })
-    return cb(null, profile)
+  async (accessToken, refreshToken, profile, cb) => {
+    const user = await User.findOne({ googleId: profile.id })
+    if (!user) {
+      const newUser = new User({
+        googleId: profile.id,
+        username: profile.displayName,
+        email: profile.emails[0].value,
+      }) 
+      await newUser.save()
+      return cb(null, newUser)
+    }
+    return cb(null, user)
   }
 ))
 

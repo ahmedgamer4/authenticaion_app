@@ -3,12 +3,12 @@ const app = express()
 import mongoose from 'mongoose'
 import loginRouter from './controllers/login.js'
 import { userRouter } from './controllers/user.js'
-import { MONGODB_URI, PORT } from './utils/config.js'
+import { MONGO_URI, PORT } from './utils/config.js'
 
 
 
 mongoose
-  .connect(MONGODB_URI)
+  .connect(MONGO_URI)
   .then(() => {
     console.log('Connected to MongoDB')
   })
