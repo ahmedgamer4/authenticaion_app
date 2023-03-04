@@ -54,6 +54,16 @@ userRouter.get('/auth/facebook/callback',
   }
 )
 
+userRouter.get('/auth/github', passport.authenticate('github'));
+
+userRouter.get('/auth/github/callback',
+  passport.authenticate('github', { failureRedirect: '/login' }),
+  (req, res) => {
+    const token = jwt.sign({ userId: (req.user as UserType).facebookId}, SECRET)
+    res.json({ token })
+  }
+)
+
 userRouter.post('/register', async (req, res) => {
   const { password, email } = req.body as BodyType
 
