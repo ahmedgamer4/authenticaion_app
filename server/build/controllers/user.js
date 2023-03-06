@@ -1,36 +1,110 @@
-import express from 'express';
-export const userRouter = express.Router();
-import { User } from '../models/user.js';
 import bcrypt from 'bcrypt';
+import express from 'express';
+import mongoose from 'mongoose';
+import { User } from '../models/user.js';
+import passport from 'passport';
+import jwt from 'jsonwebtoken';
+import { SECRET } from '../utils/config.js';
+export const userRouter = express.Router();
 userRouter.get('/', async (req, res) => {
     const users = await User.find({});
-    res.status(200).json(users);
+    return res.status(200).json(users);
+});
+userRouter.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+userRouter.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
+    const token = jwt.sign({ userId: req.user.googleId }, SECRET);
+    res.json({ token });
+});
+userRouter.get('/auth/facebook', passport.authenticate('facebook'));
+userRouter.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/login' }), (req, res) => {
+    const token = jwt.sign({ userId: req.user.facebookId }, SECRET);
+    res.json({ token });
+});
+userRouter.get('/auth/github', passport.authenticate('github'));
+userRouter.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
+    const token = jwt.sign({ userId: req.user.facebookId }, SECRET);
+    res.json({ token });
 });
 userRouter.post('/register', async (req, res) => {
-    const { username, password } = req.body;
-    const existingUser = await User.findOne({ username });
+    const { password, email } = req.body;
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
         return res.status(400).json({
             error: 'User already exists',
         });
     }
-    if (!username || !password) {
+    if (!password) {
         return res.status(400).json({
             error: 'must provide a username and password',
         });
     }
-    if (password.length < 3 || username.length < 3) {
+    if (password.length < 3) {
         return res.status(400).json({
-            error: 'username and password cannot be less than 3 characters'
+            error: 'password cannot be less than 3 characters'
         });
     }
     const passwordHash = await bcrypt.hash(password, 10);
     const user = new User({
-        username,
         passwordHash,
+        email,
     });
     console.log(user);
-    const savedUser = user.save();
-    return res.status(201).json(savedUser);
+    const savedUser = await user.save();
+    const userForToken = {
+        id: savedUser._id,
+    };
+    const token = jwt.sign(userForToken, SECRET);
+    return res.status(201).json({ token });
+});
+userRouter.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    const passwordCorrect = user === null
+        ? false
+        : await bcrypt.compare(password, user.passwordHash);
+    if (!(user && passwordCorrect)) {
+        return res.status(401).json({
+            error: 'invalid username or password',
+        });
+    }
+    const userForToken = {
+        id: user._id,
+    };
+    const token = jwt.sign(userForToken, process.env.SECRET);
+    res.status(200)
+        .send({ token });
+});
+userRouter.get('/:id', async (req, res) => {
+    const id = req.params.id;
+    console.log(id);
+    const isValidId = mongoose.Types.ObjectId.isValid(id);
+    try {
+        if (id && isValidId) {
+            const user = await User.findById({ _id: id });
+            return res.json(user);
+        }
+        else {
+            return res.status(404).send('Link is not found');
+        }
+    }
+    catch (err) {
+        return res.status(500).json(err);
+    }
+});
+userRouter.put('/:id', async (req, res) => {
+    const { body } = req;
+    const { id } = req.params;
+    const isValidId = mongoose.Types.ObjectId.isValid(id);
+    try {
+        if (id && isValidId) {
+            const updatedUser = await User.findByIdAndUpdate({ _id: id }, body, { new: true });
+            if (!updatedUser)
+                return res.status(404).end();
+            return res.status(200).json(updatedUser);
+        }
+    }
+    catch (err) {
+        return res.status(500).json(err);
+    }
 });
 //# sourceMappingURL=user.js.map

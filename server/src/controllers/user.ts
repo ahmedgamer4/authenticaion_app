@@ -40,7 +40,9 @@ userRouter.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
     const token = jwt.sign({ userId: (req.user as UserType).googleId}, SECRET)
-    res.json({ token })
+    // res.json({ token })
+    // res.redirect(`http://localhost:3001/?token=${token}`)
+    res.redirect(`/?token=${token}`)
   }
 )
 
@@ -50,7 +52,7 @@ userRouter.get('/auth/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/login' }),
   (req, res) => {
     const token = jwt.sign({ userId: (req.user as UserType).facebookId}, SECRET)
-    res.json({ token })
+    res.redirect(`/?token=${token}`)
   }
 )
 
@@ -60,7 +62,7 @@ userRouter.get('/auth/github/callback',
   passport.authenticate('github', { failureRedirect: '/login' }),
   (req, res) => {
     const token = jwt.sign({ userId: (req.user as UserType).facebookId}, SECRET)
-    res.json({ token })
+    res.redirect(`/?token=${token}`)
   }
 )
 
@@ -113,11 +115,11 @@ userRouter.post('/login', async (req, res) => {
   const { email, password } = req.body as BodyType
 
   const user: UserType = await User.findOne({ email })
-  const passwordCorrect = user === null
+  const passwordCorrect = user.passwordHash === null
     ? false
     : await bcrypt.compare(password, user.passwordHash)
 
-  if (!(user && passwordCorrect)) {
+  if (!passwordCorrect) {
     return res.status(401).json({
       error: 'invalid username or password',
     })

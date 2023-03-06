@@ -1,8 +1,4 @@
 import dotenv from 'dotenv';
 dotenv.config();
-export const { PORT } = process.env;
-export const MONGODB_URI = process.env.NODE_ENV === 'test'
-    ? process.env.TEST_MONGO_URI
-    : process.env.MONGO_URI;
-console.log(MONGODB_URI);
+export const { PORT, SECRET, MONGO_URI, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, FACEBOOK_CLIENT_ID, FACEBOOK_CLIENT_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, } = process.env;
 //# sourceMappingURL=config.js.map

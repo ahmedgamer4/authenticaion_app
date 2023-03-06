@@ -20,7 +20,6 @@ passport.use(new GoogleStrategy({
       const newUser = new User({
         googleId: profile.id,
         username: profile.displayName,
-        email: profile.emails[0].value,
       }) 
       await newUser.save()
       return cb(null, newUser)
@@ -37,9 +36,8 @@ passport.use(new FacebookStrategy({
     const user = await User.findOne({ facebookId: profile.id })
     if (!user) {
       const newUser = new User({
-        googleId: profile.id,
+        facebookId: profile.id,
         username: profile.displayName,
-        email: profile.emails[0].value,
       }) 
       await newUser.save()
       return cb(null, newUser)
@@ -55,9 +53,8 @@ passport.use(new GithubStrategy({
     const user = await User.findOne({ githubId: profile.id })
     if (!user) {
       const newUser = new User({
-        googleId: profile.id,
+        githubId: profile.id,
         username: profile.displayName,
-        email: profile.emails[0].value,
       }) 
       await newUser.save()
       return cb(null, newUser)
