@@ -56,7 +56,11 @@ Introduce your projects by taking a screenshot or a gif. Try to tell visitors a 
 
 ## Features
 
-<!-- List the features of your application or follow the template. Don't share the figma file here :) -->
+- [x] user can login with email and password
+- [x] user can register with email and password
+- [x] user can login with google, facebook, and github
+- [x] users can see their information 
+- [] users can edit their information 
 
 This application/site was created as a submission to a [DevChallenges](https://devchallenges.io/challenges) challenge. The [challenge](https://devchallenges.io/challenges/N1fvBjQfhlkctmwj1tnw) was to build an application to complete the given user storie.
 
