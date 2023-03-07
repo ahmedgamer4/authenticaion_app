@@ -1,25 +1,33 @@
 import axios from 'axios'
 import { serverOrigin } from '../main';
 
-type LoginUserProps = {
+type UserProps = {
   email: string;
   password: string;
 }
 
-type LoginUserReturnType = {
+type UserReturnType = {
   token: string;
 }
 
-export const loginUser = async (data: LoginUserProps): Promise<LoginUserReturnType> => {
+export const loginUser = async (data: UserProps): Promise<UserReturnType> => {
   const baseUrl = serverOrigin + '/api/users/login'
   const user = await axios.post(baseUrl, data)
   
   return user.data
 }
 
-export const googleLogin = async () => {
-  const baseUrl = serverOrigin + '/api/users/auth/google'
+export const registerUser = async (data: UserProps): Promise<UserReturnType> => {
+  const baseUrl = serverOrigin + '/api/users/register'
+  const user = await axios.post(baseUrl, data)
+  
+  return user.data
+}
+
+export const getUser = async () => {
+  const baseUrl = serverOrigin + '/api/users'
   const user = await axios.get(baseUrl)
 
   return user.data
 }
+

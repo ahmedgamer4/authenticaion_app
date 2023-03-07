@@ -5,6 +5,10 @@ import { User } from '../models/user.js'
 import passport from 'passport'
 import jwt from 'jsonwebtoken'
 import { SECRET } from '../utils/config.js'
+import path from 'path'
+import * as url from 'url';
+
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 export const userRouter = express.Router()
 
@@ -28,10 +32,17 @@ type UserType = {
   githubId?: string;
 }
 
-userRouter.get('/', async (req, res) => {
-  const users = await User.find({})
+userRouter.get('*', function(req, res) {
+  console.log(__dirname)
+  res.sendFile(path.join(__dirname,'..', '..' , 'dist/index.html'), function(err) {
+    if (err) {
+      res.status(500).send(err)
+    }
+  })
+})  
 
-  return res.status(200).json(users)
+userRouter.get('/', async (req, res) => {
+  return res.status(200).json(req.user)
 })
 
 userRouter.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
@@ -40,8 +51,6 @@ userRouter.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
     const token = jwt.sign({ userId: (req.user as UserType).googleId}, SECRET)
-    // res.json({ token })
-    // res.redirect(`http://localhost:3001/?token=${token}`)
     res.redirect(`/?token=${token}`)
   }
 )
@@ -134,28 +143,15 @@ userRouter.post('/login', async (req, res) => {
     process.env.SECRET,
   )
 
+  if (req.user) {
+    delete req.user
+    req.user = user
+    console.log(req.user)
+  }
+
   res.status(200)
     .send({ token })
 })  
-
-userRouter.get('/:id', async (req, res) => {
-  const id = req.params.id
-  console.log(id)
-  const isValidId = mongoose.Types.ObjectId.isValid(id)
-
-  try {
-
-    if (id && isValidId) {
-      const user = await User.findById({ _id: id })
-      return res.json(user)
-    } else {
-      return res.status(404).send('Link is not found')
-    }
-
-  } catch(err) {
-    return res.status(500).json(err)
-  }
-})
 
 userRouter.put('/:id', async (req, res) => {
   const { body } = req

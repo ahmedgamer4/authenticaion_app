@@ -3,7 +3,12 @@ import Google from 'passport-google-oauth2'
 import Facebook from 'passport-facebook'
 import Github from 'passport-github'
 import { User } from '../models/user.js'
-import { FACEBOOK_CLIENT_ID, FACEBOOK_CLIENT_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from './config.js'
+import { FACEBOOK_CLIENT_ID,
+  FACEBOOK_CLIENT_SECRET,
+  GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET } from './config.js'
 
 const GoogleStrategy = Google.Strategy
 const FacebookStrategy = Facebook.Strategy

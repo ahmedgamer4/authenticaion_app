@@ -61,17 +61,17 @@ const RegisterForm = ({ email, password, setEmail, setPassword, handleLogin }: R
 
       <p className='text-xs text-gray-500 mt-6'>or continue with these social profile</p>
       <div className='mt-5 flex w-52 justify-between'>
-        <Link to={'/api/users/auth/google'}>
+        <a href='/api/users/auth/google'>
           <img src={googleImg} alt="google"/>
-        </Link>
-        <Link to={'/api/users/auth/facebook'}>
+        </a>
+        <a href='/api/users/auth/facebook'>
           <img src={facebookImg} alt="facebook" />
-        </Link>
-        <Link to={'/api/users/auth/github'}>
+        </a>
+        <a href='/api/users/auth/github'>
           <img src={githubImg} alt="github" />
-        </Link>
+        </a>
       </div>
-      <p className='text-gray-500 text-sm mt-5'>Already a member?<Link to='/register' className='text-blue-500'>Register</Link></p>
+      <p className='text-gray-500 text-sm mt-5'>Already a member?<Link to='/login' className='text-blue-500'>Login</Link></p>
     </div>
   )
 }
