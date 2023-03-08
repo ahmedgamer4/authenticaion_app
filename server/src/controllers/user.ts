@@ -6,7 +6,7 @@ import passport from 'passport'
 import jwt from 'jsonwebtoken'
 import { SECRET } from '../utils/config.js'
 import path from 'path'
-import * as url from 'url';
+import url from 'url';
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
@@ -17,7 +17,7 @@ type BodyType = {
   password: string;
 }
 
-type UserType = {
+export type UserType = {
   username: string;
   _id: string;
   __v: number;
@@ -32,17 +32,20 @@ type UserType = {
   githubId?: string;
 }
 
-userRouter.get('*', function(req, res) {
-  console.log(__dirname)
-  res.sendFile(path.join(__dirname,'..', '..' , 'dist/index.html'), function(err) {
-    if (err) {
-      res.status(500).send(err)
-    }
-  })
-})  
+// userRouter.get('*', function(req, res) {
+//   console.log(__dirname)
+//   res.sendFile(path.join(__dirname,'..', '..' , 'dist/index.html'), function(err) {
+//     if (err) {
+//       res.status(500).send(err)
+//     }
+//   })
+// })  
 
 userRouter.get('/', async (req, res) => {
-  return res.status(200).json(req.user)
+  if (req.isAuthenticated) {
+    res.status(200).json(req.user)
+  }
+  console.log(req.user)
 })
 
 userRouter.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
@@ -50,8 +53,7 @@ userRouter.get('/auth/google', passport.authenticate('google', { scope: ['profil
 userRouter.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
-    const token = jwt.sign({ userId: (req.user as UserType).googleId}, SECRET)
-    res.redirect(`/?token=${token}`)
+    res.redirect('/')
   }
 )
 
@@ -60,8 +62,7 @@ userRouter.get('/auth/facebook', passport.authenticate('facebook'));
 userRouter.get('/auth/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/login' }),
   (req, res) => {
-    const token = jwt.sign({ userId: (req.user as UserType).facebookId}, SECRET)
-    res.redirect(`/?token=${token}`)
+    res.redirect('/')
   }
 )
 
@@ -70,8 +71,7 @@ userRouter.get('/auth/github', passport.authenticate('github'));
 userRouter.get('/auth/github/callback',
   passport.authenticate('github', { failureRedirect: '/login' }),
   (req, res) => {
-    const token = jwt.sign({ userId: (req.user as UserType).facebookId}, SECRET)
-    res.redirect(`/?token=${token}`)
+    res.redirect('/')
   }
 )
 
@@ -106,52 +106,17 @@ userRouter.post('/register', async (req, res) => {
 
   console.log(user)
 
-  const savedUser = await user.save()
+  await user.save()
   
-  const userForToken = {
-    id: savedUser._id,
-  }
-
-  const token = jwt.sign(
-    userForToken,
-    SECRET,
-  )
-
-  return res.status(201).json({ token })
+  res.end()
 })
 
-userRouter.post('/login', async (req, res) => {
-  const { email, password } = req.body as BodyType
-
-  const user: UserType = await User.findOne({ email })
-  const passwordCorrect = user.passwordHash === null
-    ? false
-    : await bcrypt.compare(password, user.passwordHash)
-
-  if (!passwordCorrect) {
-    return res.status(401).json({
-      error: 'invalid username or password',
-    })
-  }
-
-  const userForToken = {
-    id: user._id,
-  }
-
-  const token = jwt.sign(
-    userForToken,
-    process.env.SECRET,
-  )
-
-  if (req.user) {
-    delete req.user
-    req.user = user
-    console.log(req.user)
-  }
-
-  res.status(200)
-    .send({ token })
-})  
+userRouter.post('/login',
+  passport.authenticate('local', { 
+    failureRedirect: '/login',
+    successRedirect: '/',
+    failureFlash: true,
+  }))  
 
 userRouter.put('/:id', async (req, res) => {
   const { body } = req
@@ -168,3 +133,16 @@ userRouter.put('/:id', async (req, res) => {
     return res.status(500).json(err)
   }
 })
+
+userRouter.get('/logout', (req: express.Request, res, next) => {
+  // req.logout(() => {
+  //   console.log(req.user)
+  //   res.redirect('/login')
+  // })
+
+  req.session.destroy(() => {
+    console.log(req.user)
+    res.redirect('/login')
+  })
+})
+

@@ -20,7 +20,7 @@ type UserProps = {
 
 const User = ({ user }: UserProps) => {
   return (
-    <div className="mx-auto flex flex-col items-center ">
+    <div className="mx-auto flex flex-col items-center mt-8">
       <h1 className="sm:text-3xl text-2xl">Personal info</h1>
       <p className="text-gray-700 text-sm mt-3">Basic information, like your name and photo</p>
       <div className="sm:w-full md:w-[700px] border border-gray-300 rounded-lg mt-8">
@@ -29,7 +29,7 @@ const User = ({ user }: UserProps) => {
             <h3 className="text-xl text-gray-700">Profile</h3>
             <p className="text-gray-700 text-xs mt-1.5">Some info may be visible to other people</p>
           </div>
-          <Link className="rounded-lg border border-gray-600 text-gray-600 py-1 px-5 text-sm h-8 hover:bg-gray-50" to={'#'}>Edit</Link>
+          <Link className="rounded-lg border border-gray-600 text-gray-600 py-1 px-5 text-sm h-8 hover:bg-gray-50" to={'/edit'}>Edit</Link>
         </section>
 
         <section className="py-5 px-8 flex justify-between items-center border-b border-gray-300">

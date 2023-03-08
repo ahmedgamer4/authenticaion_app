@@ -10,11 +10,9 @@ type UserReturnType = {
   token: string;
 }
 
-export const loginUser = async (data: UserProps): Promise<UserReturnType> => {
+export const loginUser = async (data: UserProps) => {
   const baseUrl = serverOrigin + '/api/users/login'
-  const user = await axios.post(baseUrl, data)
-  
-  return user.data
+  await axios.post(baseUrl, data)
 }
 
 export const registerUser = async (data: UserProps): Promise<UserReturnType> => {
@@ -22,6 +20,11 @@ export const registerUser = async (data: UserProps): Promise<UserReturnType> => 
   const user = await axios.post(baseUrl, data)
   
   return user.data
+}
+
+export const logoutUser = async () => {
+  const baseUrl = serverOrigin + '/api/users/logout'
+  await axios.get(baseUrl)
 }
 
 export const getUser = async () => {

@@ -2,9 +2,9 @@ import express from 'express'
 const app = express()
 import mongoose from 'mongoose'
 import passport from './utils/passport.js'
-import cookieSession from 'cookie-session'
+import session from 'express-session'
 import { userRouter } from './controllers/user.js'
-import { MONGO_URI, PORT } from './utils/config.js'
+import { MONGO_URI, PORT, SECRET } from './utils/config.js'
 
 app.use(express.static('dist'))
 app.use(express.json())
@@ -18,13 +18,15 @@ mongoose
     console.error(err)
   })
 
-app.use(cookieSession({
-  name: 'tuto-session',
-  keys: ['key1', 'key2']
-}))
+app.use(session({
+  secret: SECRET,
+  resave: false,
+  saveUninitialized: false
+}));
 
 app.use(passport.initialize())
 app.use(passport.session())
+
 app.use('/api/users', userRouter)
 
 app.listen(PORT, () => {

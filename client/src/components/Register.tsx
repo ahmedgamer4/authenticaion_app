@@ -10,10 +10,10 @@ type RegisterFormProps = {
   password: string;
   setEmail: React.Dispatch<React.SetStateAction<string>>;
   setPassword: React.Dispatch<React.SetStateAction<string>>;
-  handleLogin: (e: React.FormEvent) => void;
+  handleRegister: (e: React.FormEvent) => void;
 }
 
-const RegisterForm = ({ email, password, setEmail, setPassword, handleLogin }: RegisterFormProps) => {
+const RegisterForm = ({ email, password, setEmail, setPassword, handleRegister}: RegisterFormProps) => {
   return (
 
     <div className='flex flex-col items-center rounded-xl border border-gray-200 max-w-[400px] px-7 py-7 sm:px-11 sm:py-9'>
@@ -23,7 +23,7 @@ const RegisterForm = ({ email, password, setEmail, setPassword, handleLogin }: R
         Master web development by making real-life projects.There are multiple paths for you to choose.
       </p>
 
-      <form className='mt-6 w-full' onSubmit={handleLogin}>
+      <form className='mt-6 w-full' onSubmit={handleRegister}>
 
         <div className="relative flex w-full items-center mt-2">
           <span className="absolute text-gray-400 left-[12px]">
