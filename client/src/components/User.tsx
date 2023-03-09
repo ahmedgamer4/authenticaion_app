@@ -7,7 +7,7 @@ type UserProps = {
     _id: string;
     __v: number;
     passwordHash: string; 
-    img: string;
+    photo: string;
     bio: string;
     phone: string;
     email: string;
@@ -34,7 +34,7 @@ const User = ({ user }: UserProps) => {
 
         <section className="py-5 px-8 flex justify-between items-center border-b border-gray-300">
           <p className="uppercase text-gray-500 text-xs">photo</p>
-          <img src={user.img} alt="img" className="w-14 h-14 rounded-md object-cover bg-gray-300" />
+          <img src={user.photo} alt="img" className="w-14 h-14 rounded-md object-cover bg-gray-300" />
           {/* <div className="flex-grow"></div> */}
         </section>
 

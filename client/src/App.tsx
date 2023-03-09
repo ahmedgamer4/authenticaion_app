@@ -16,7 +16,7 @@ function App() {
     _id: '',
     __v: 0,
     passwordHash: '', 
-    img: '',
+    photo: '',
     bio: '',
     phone: '',
     email: '',
@@ -73,7 +73,7 @@ function App() {
         <div>
           <Link to='/login'>login</Link>
         </div>
-        <DropDown username={user.username} img={user.img} />
+        <DropDown username={user.username} img={user.photo} />
       </header>
       <Routes>
         <Route path='/login' element={<LoginForm
@@ -91,7 +91,7 @@ function App() {
           password={password}
           email={email}
         />} />
-        <Route path='/edit' element={<EditForm />} />
+        <Route path='/edit' element={<EditForm user={user} />} />
       </Routes>
       <div />
     </div>

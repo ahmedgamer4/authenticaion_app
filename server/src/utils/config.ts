@@ -12,5 +12,8 @@ export const {
   FACEBOOK_CLIENT_SECRET,
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
+  CLOUD_NAME,
+  API_KEY,
+  API_SECRET,
 } = process.env
 
