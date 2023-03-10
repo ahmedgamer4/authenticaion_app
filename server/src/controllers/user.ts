@@ -39,7 +39,7 @@ userRouter.get('/auth/google', passport.authenticate('google', { scope: ['profil
 userRouter.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
-    res.redirect('/')
+    res.end()
   }
 )
 
@@ -48,7 +48,7 @@ userRouter.get('/auth/facebook', passport.authenticate('facebook'));
 userRouter.get('/auth/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/login' }),
   (req, res) => {
-    res.redirect('/')
+    res.end()
   }
 )
 
@@ -57,7 +57,7 @@ userRouter.get('/auth/github', passport.authenticate('github'));
 userRouter.get('/auth/github/callback',
   passport.authenticate('github', { failureRedirect: '/login' }),
   (req, res) => {
-    res.redirect('/')
+    res.end()
   }
 )
 
