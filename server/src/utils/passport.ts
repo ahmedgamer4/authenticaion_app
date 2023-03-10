@@ -35,7 +35,7 @@ passport.use(new LocalStrategy({usernameField: 'email'},
 passport.use(new GoogleStrategy({
   clientID: GOOGLE_CLIENT_ID,
   clientSecret: GOOGLE_CLIENT_SECRET,
-  callbackURL: 'http://localhost:3001/api/users/auth/google/callback',
+  callbackURL: 'https://authentication-app-9yax.onrender.com/api/users/auth/google/callback',
   scope: ['profile', 'email']
 }, 
   async (accessToken, refreshToken, profile, cb) => {
@@ -56,7 +56,7 @@ passport.use(new GoogleStrategy({
 passport.use(new FacebookStrategy({
   clientID: FACEBOOK_CLIENT_ID,
   clientSecret: FACEBOOK_CLIENT_SECRET,
-  callbackURL: 'http://localhost:3001/api/users/auth/facebook/callback',
+  callbackURL: 'https://authentication-app-9yax.onrender.com/api/users/auth/facebook/callback',
   scope: ['profile', 'email']
 }, async (accessToken, refreshToken, profile, cb) => {
     const user = await User.findOne({ facebookId: profile.id })
@@ -75,7 +75,7 @@ passport.use(new FacebookStrategy({
 passport.use(new GithubStrategy({
   clientID: GITHUB_CLIENT_ID,
   clientSecret: GITHUB_CLIENT_SECRET,
-  callbackURL: 'http://localhost:3001/api/users/auth/github/callback',
+  callbackURL: 'https://authentication-app-9yax.onrender.com/api/users/auth/github/callback',
   scope: ['profile', 'email'],
 }, async (accessToken, refreshToken, profile, cb) => {
     const user = await User.findOne({ githubId: profile.id })
