@@ -1,29 +1,26 @@
 import bcrypt from 'bcrypt';
 import express from 'express';
-import mongoose from 'mongoose';
 import { User } from '../models/user.js';
 import passport from 'passport';
-import jwt from 'jsonwebtoken';
-import { SECRET } from '../utils/config.js';
+import { cloudinary, upload } from '../utils/cloudnary.js';
 export const userRouter = express.Router();
 userRouter.get('/', async (req, res) => {
-    const users = await User.find({});
-    return res.status(200).json(users);
+    if (req.isAuthenticated) {
+        res.status(200).json(req.user);
+    }
+    console.log(req.user);
 });
 userRouter.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 userRouter.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
-    const token = jwt.sign({ userId: req.user.googleId }, SECRET);
-    res.json({ token });
+    res.redirect('/');
 });
 userRouter.get('/auth/facebook', passport.authenticate('facebook'));
 userRouter.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/login' }), (req, res) => {
-    const token = jwt.sign({ userId: req.user.facebookId }, SECRET);
-    res.json({ token });
+    res.redirect('/');
 });
 userRouter.get('/auth/github', passport.authenticate('github'));
 userRouter.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
-    const token = jwt.sign({ userId: req.user.facebookId }, SECRET);
-    res.json({ token });
+    res.redirect('/');
 });
 userRouter.post('/register', async (req, res) => {
     const { password, email } = req.body;
@@ -49,62 +46,60 @@ userRouter.post('/register', async (req, res) => {
         email,
     });
     console.log(user);
-    const savedUser = await user.save();
-    const userForToken = {
-        id: savedUser._id,
-    };
-    const token = jwt.sign(userForToken, SECRET);
-    return res.status(201).json({ token });
+    await user.save();
+    res.end();
 });
-userRouter.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    const passwordCorrect = user === null
-        ? false
-        : await bcrypt.compare(password, user.passwordHash);
-    if (!(user && passwordCorrect)) {
-        return res.status(401).json({
-            error: 'invalid username or password',
-        });
-    }
-    const userForToken = {
-        id: user._id,
-    };
-    const token = jwt.sign(userForToken, process.env.SECRET);
-    res.status(200)
-        .send({ token });
-});
-userRouter.get('/:id', async (req, res) => {
-    const id = req.params.id;
-    console.log(id);
-    const isValidId = mongoose.Types.ObjectId.isValid(id);
+userRouter.post('/login', passport.authenticate('local', {
+    failureRedirect: '/login',
+    successRedirect: '/',
+    // failureFlash: true,
+}));
+userRouter.post('/upload', upload.single('image'), async (req, res) => {
     try {
-        if (id && isValidId) {
-            const user = await User.findById({ _id: id });
-            return res.json(user);
-        }
-        else {
-            return res.status(404).send('Link is not found');
-        }
+        const result = await cloudinary.uploader.upload(req.file.path);
+        const user = await User.findById(req.user._id);
+        user.photo = result.secure_url;
+        await user.save();
+        res.status(200).send({ message: 'Profile image updated successfully' });
     }
     catch (err) {
-        return res.status(500).json(err);
+        res.status(400).send({ message: 'Error updating profile image' });
     }
 });
-userRouter.put('/:id', async (req, res) => {
+userRouter.put('/:id', upload.single('image'), async (req, res) => {
     const { body } = req;
+    console.log('body', body);
     const { id } = req.params;
-    const isValidId = mongoose.Types.ObjectId.isValid(id);
     try {
-        if (id && isValidId) {
-            const updatedUser = await User.findByIdAndUpdate({ _id: id }, body, { new: true });
-            if (!updatedUser)
-                return res.status(404).end();
-            return res.status(200).json(updatedUser);
+        let passwordHash;
+        if (body.password) {
+            passwordHash = await bcrypt.hash(body.password, 10);
         }
+        const user = await User.findById({ _id: id });
+        const newUser = {
+            passwordHash: passwordHash ? passwordHash : user.passwordHash,
+            bio: body.bio,
+            email: body.email ? body.email : user.email,
+            phone: body.phone,
+            googleId: user.googleId,
+            githubId: user.githubId,
+            facebookId: user.facebookId,
+            username: body.username,
+        };
+        const updatedUser = await User.findByIdAndUpdate({ _id: id }, newUser, { new: true });
+        if (!updatedUser)
+            return res.status(404).end();
+        console.log('updated user', updatedUser);
+        res.json(updatedUser);
     }
     catch (err) {
-        return res.status(500).json(err);
+        return res.status(500).json({ error: err });
     }
+});
+userRouter.get('/logout', (req, res) => {
+    req.session.destroy(() => {
+        console.log(req.user);
+        res.redirect('/login');
+    });
 });
 //# sourceMappingURL=user.js.map

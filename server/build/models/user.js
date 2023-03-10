@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema({
         minLength: 5,
     },
     googleId: String,
-    twitterId: String,
     facebookId: String,
     githubId: String,
 });
