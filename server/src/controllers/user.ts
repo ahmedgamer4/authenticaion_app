@@ -1,18 +1,10 @@
 import bcrypt from 'bcrypt'
 import express from 'express'
-import mongoose from 'mongoose'
 import { User } from '../models/user.js'
 import passport from 'passport'
-import url from 'url';
 import { cloudinary, upload } from '../utils/cloudnary.js'
 
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
-
 export const userRouter = express.Router()
-
-interface MulterRequest extends Request {
-  file: any;
-}
 
 type BodyType = {
   email: string;
@@ -34,14 +26,6 @@ export type UserType = {
   githubId?: string;
 }
 
-// userRouter.get('*', function(req, res) {
-//   console.log(__dirname)
-//   res.sendFile(path.join(__dirname,'..', '..' , 'dist/index.html'), function(err) {
-//     if (err) {
-//       res.status(500).send(err)
-//     }
-//   })
-// })  
 
 userRouter.get('/', async (req, res) => {
   if (req.isAuthenticated) {

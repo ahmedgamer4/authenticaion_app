@@ -20,10 +20,10 @@ type UserProps = {
 
 const User = ({ user }: UserProps) => {
   return (
-    <div className="mx-auto flex flex-col items-center mt-8">
+    <div className="w-full mx-auto flex flex-col items-center mt-8">
       <h1 className="sm:text-3xl text-2xl">Personal info</h1>
       <p className="text-gray-700 text-sm mt-3">Basic information, like your name and photo</p>
-      <div className="sm:w-full md:w-[700px] border border-gray-300 rounded-lg mt-8">
+      <div className="w-full md:w-[700px] border border-gray-300 rounded-lg mt-8">
         <section className="py-5 px-8 flex justify-between items-center border-b border-gray-300">
           <div>
             <h3 className="text-xl text-gray-700">Profile</h3>
